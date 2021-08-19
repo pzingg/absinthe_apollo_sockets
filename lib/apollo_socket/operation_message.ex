@@ -37,16 +37,39 @@ defmodule ApolloSocket.OperationMessage do
   @doc "Simply creates a GQL_CONNECTION_ACK message"
   def new_connection_ack(), do: %__MODULE__{type: :gql_connection_ack}
 
-  def new_data(id, data, resolver_errors \\ nil) do
-    %__MODULE__{type: :gql_data, id: id, payload: %{ data: data }}
-    |> add_resolver_errors_to_payload(resolver_errors)
+  def new_data(id, payload) when is_map(payload) do
+    %__MODULE__{type: :gql_data, id: id, payload: %{}}
+    |> add_resolver_errors_to_payload(payload)
+    |> add_data_to_payload(payload)
+    |> add_extensions_to_payload(payload)
   end
 
   def new_complete(operation_id), do: %__MODULE__{type: :gql_complete, id: operation_id}
 
-  defp add_resolver_errors_to_payload(message, nil), do: message
-  defp add_resolver_errors_to_payload(message, resolver_errors) do
-    %__MODULE__{message | payload: Map.put(message.payload, :errors, resolver_errors)}
+  defp add_resolver_errors_to_payload(message, payload) do
+    errors = Map.get(payload, :errors)
+    if is_list(errors) && !Enum.empty?(errors) do
+      %__MODULE__{message | payload: Map.put(message.payload, :errors, errors)}
+    else
+      message
+    end
+  end
+
+  defp add_data_to_payload(message, payload) do
+    if Map.has_key?(payload, :data) do
+      %__MODULE__{message | payload: Map.put(message.payload, :data, payload[:data])}
+    else
+      message
+    end
+  end
+
+  defp add_extensions_to_payload(message, payload) do
+    extensions = Map.get(payload, :extensions)
+    if is_map(extensions) && !Enum.empty?(extensions) do
+      %__MODULE__{message | payload: Map.put(message.payload, :extensions, extensions)}
+    else
+      message
+    end
   end
 
   @doc """

@@ -60,10 +60,7 @@ defmodule ApolloSocket.AbsintheMessageHandler do
 
   defp messages_for_result(operation_id, query_response) when is_map(query_response) do
     [
-      OperationMessage.new_data(
-        operation_id,
-        Map.get(query_response, :data),
-        Map.get(query_response, :errors)),
+      OperationMessage.new_data(operation_id, query_response),
       OperationMessage.new_complete(operation_id)
     ]
   end

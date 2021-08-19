@@ -50,30 +50,23 @@ defmodule ApolloSocket.DataBroker do
     {:noreply, state}
   end
 
-  def handle_info(%{data: _, errors: _} = proc_message, state) do
-    send_data_result(proc_message, state)
-  end
+  @response_set MapSet.new([:data, :errors, :extensions])
 
-  def handle_info(%{errors: _} = proc_message, state) do
-    send_data_result(proc_message, state)
-  end
+  def handle_info(proc_message, state) when is_map(proc_message) do
+    if MapSet.subset?(Map.keys(proc_message) |> MapSet.new(), @response_set) do
+      send_data_result(proc_message, state)
+    else
+      _ = Logger.warn("id #{state.operation_id} ingoring non-conforming map #{inspect(proc_message)}")
 
-  def handle_info(%{data: _} = proc_message, state) do
-    send_data_result(proc_message, state)
+      {:noreply, state}
+    end
   end
 
   defp send_data_result(proc_message, state) when is_map(proc_message) do
-    op_message = data_message_for_result(state.operation_id, proc_message)
+    op_message = OperationMessage.new_data(state.operation_id, proc_message)
     ApolloSocket.send_message(state.apollo_socket, op_message)
 
     {:noreply, state}
-  end
-
-  defp data_message_for_result(operation_id, query_response) when is_map(query_response) do
-    OperationMessage.new_data(
-      operation_id,
-      Map.get(query_response, :data),
-      Map.get(query_response, :errors))
   end
 
   def subscribe_to_data(nil, _), do: raise "#{__MODULE__} requires the Absinthe PubSub module to subscribe to"
