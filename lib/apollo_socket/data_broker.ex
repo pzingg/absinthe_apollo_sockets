@@ -65,7 +65,7 @@ defmodule ApolloSocket.DataBroker do
     # Websocket went down.  This process can exit now
     Logger.debug("id #{state.operation_id} received :DOWN #{inspect(pid)} #{reason}")
 
-    {:stop, reason, state}
+    {:stop, :normal, state}
   end
 
   @response_set MapSet.new([:data, :errors, :extensions])
@@ -74,7 +74,7 @@ defmodule ApolloSocket.DataBroker do
     if MapSet.subset?(Map.keys(proc_message) |> MapSet.new(), @response_set) do
       send_data_result(proc_message, state)
     else
-      _ = Logger.warn("id #{state.operation_id} ingoring non-conforming map #{inspect(proc_message)}")
+      Logger.warn("id #{state.operation_id} ingoring non-conforming map #{inspect(proc_message)}")
 
       {:noreply, state}
     end
