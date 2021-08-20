@@ -12,9 +12,9 @@ defmodule ApolloCowboyExample do
             {
               ApolloSocket.AbsintheMessageHandler,
               schema: ApolloCowboyExample.Schema,
-              extra_phase: ApolloCowboyExample.RollupExtensionsPhase,
               pubsub: ApolloCowboyExample.Absinthe.PubSub,
-              broker_sup: ApolloCowboyExample.BrokerSupervisor
+              broker_sup: ApolloCowboyExample.BrokerSupervisor,
+              pipeline: ApolloCowboyExample.RollupExtensionsPhase,
             }},
            {"/[...]", :cowboy_static, {:priv_dir, :apollo_cowboy, "static"}}
          ]}
