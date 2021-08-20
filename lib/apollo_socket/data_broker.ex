@@ -44,10 +44,9 @@ defmodule ApolloSocket.DataBroker do
   end
 
   def handle_info({:DOWN, _ref, :process, pid, reason}, state) do
-    IO.puts("Tearing down data broker #{inspect pid} #{reason}")
     # my websocket went down.  This process can exit now
-    Process.exit(self(), reason)
-    {:noreply, state}
+    _ = Logger.info("id #{state.operation_id} tearing down data broker #{inspect(pid)} #{reason}")
+    {:stop, :normal, state}
   end
 
   @response_set MapSet.new([:data, :errors, :extensions])

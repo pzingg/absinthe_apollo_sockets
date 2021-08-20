@@ -6,7 +6,7 @@ defmodule ApolloSocket.AbsintheMessageHandler do
 
   @impl ApolloSocket.MessageHandler
   def init(opts) when is_list(opts) do
-    {known_opts, _} = Keyword.split(opts, [:schema, :pubsub, :broker_sup])
+    {known_opts, _} = Keyword.split(opts, [:schema, :pubsub, :broker_sup, :extra_phase])
     Enum.into(known_opts, %{})
   end
 
@@ -16,7 +16,21 @@ defmodule ApolloSocket.AbsintheMessageHandler do
     |> add_operation_name(operation_name)
     |> add_variables(variables)
 
-    result = Absinthe.run(graphql_doc, opts[:schema], absinthe_opts)
+    schema = opts[:schema]
+    result =
+      if opts[:extra_phase] do
+        pipeline =
+          schema
+          |> Absinthe.Pipeline.for_document(absinthe_opts)
+          |> Absinthe.Pipeline.insert_after(Absinthe.Phase.Document.Result, opts[:extra_phase])
+
+        case Absinthe.Pipeline.run(graphql_doc, pipeline) do
+          {:ok, %{result: result}, _phases} -> {:ok, result}
+          {:error, reason, _phases} -> {:error, reason}
+        end
+      else
+        Absinthe.run(graphql_doc, schema, absinthe_opts)
+      end
 
     Logger.debug("Query result #{inspect result}")
 

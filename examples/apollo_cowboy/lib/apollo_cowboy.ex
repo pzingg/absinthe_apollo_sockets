@@ -12,6 +12,7 @@ defmodule ApolloCowboyExample do
             {
               ApolloSocket.AbsintheMessageHandler,
               schema: ApolloCowboyExample.Schema,
+              extra_phase: ApolloCowboyExample.RollupExtensionsPhase,
               pubsub: ApolloCowboyExample.Absinthe.PubSub,
               broker_sup: ApolloCowboyExample.BrokerSupervisor
             }},
@@ -21,14 +22,14 @@ defmodule ApolloCowboyExample do
 
     children = [
       # This is the supervisor that provides a set of counters in the schema
-      {ApolloCowboyExample.Counter, []},
+      ApolloCowboyExample.Counter,
 
       # Absinthe uses a PubSub system to handle subscriptions.
       # Ours is built on top of Phoenix PubSub so we create that
-      {Phoenix.PubSub, [adapter_name: Phoenix.PubSub.PG2, name: ApolloCowboyExample.PubSub]},
+      {Phoenix.PubSub, name: ApolloCowboyExample.PubSub},
 
       # This is the Absinthe PubSub that makes use of the Phoenix Pubsub
-      absinthe_subscriptions(ApolloCowboyExample.Absinthe.PubSub),
+      {Absinthe.Subscription, ApolloCowboyExample.Absinthe.PubSub},
 
       # When a subscription is created we create an intermediary process that
       # translates from the Absinthe PubSub to the Apollo socket protocol
@@ -47,15 +48,7 @@ defmodule ApolloCowboyExample do
     )
   end
 
-  def absinthe_subscriptions(name) do
-    %{
-      type: :supervisor,
-      id: Absinthe.Subscription,
-      start: {Absinthe.Subscription, :start_link, [name]}
-    }
-  end
-
-  def cowboy_server(port, dispatch) do
+  defp cowboy_server(port, dispatch) do
     %{
       type: :supervisor,
       id: :cowboy,

@@ -3,10 +3,17 @@ defmodule ApolloCowboyExample.Schema do
 
   alias ApolloCowboyExample.Counter
 
+  defmodule AddExtensions do
+    def call(res, _opts) do
+      %{res | extensions: %{foo: "bar"}}
+    end
+  end
+
   query do
     field :counter, :counter do
       arg(:id, non_null(:string))
 
+      middleware AddExtensions
       resolve(&Counter.counter/2)
     end
   end
