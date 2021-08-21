@@ -62,14 +62,15 @@ defmodule ApolloSocket.DataBroker do
   end
 
   def handle_info({:DOWN, _ref, :process, pid, reason}, state) do
-    # Websocket went down.  This process can exit now
-    Logger.debug("id #{state.operation_id} received :DOWN #{inspect(pid)} #{reason}")
+    # my websocket went down.  This process can exit now
+    Logger.info("id #{state.operation_id} tearing down data broker #{inspect(pid)} #{reason}")
 
     {:stop, :normal, state}
   end
 
   @response_set MapSet.new([:data, :errors, :extensions])
 
+  @dialyzer({:no_opaque, handle_info: 2})
   def handle_info(proc_message, state) when is_map(proc_message) do
     if MapSet.subset?(Map.keys(proc_message) |> MapSet.new(), @response_set) do
       send_data_result(proc_message, state)
@@ -80,6 +81,7 @@ defmodule ApolloSocket.DataBroker do
     end
   end
 
+  @dialyzer({:no_unused, send_data_result: 2})
   defp send_data_result(proc_message, state) when is_map(proc_message) do
     op_message = OperationMessage.new_data(state.operation_id, proc_message)
     ApolloSocket.send_message(state.apollo_socket, op_message)
