@@ -33,6 +33,11 @@ defmodule PhoenixSample.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      # The absinthe_phoenix dependency (which includes absinthe_plug) is only
+      # needed to support Absinthe subscriptions over Phoenix Channels, and
+      # can be omitted if `gql_on_http` and `gql_on_phoenix_channels` are
+      # both set to false in config.exs. See README.md for configuration details.
+      {:absinthe_phoenix, "~> 2.0"},
       {:phoenix, "~> 1.5.8"},
       {:phoenix_html, "~> 2.11"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},

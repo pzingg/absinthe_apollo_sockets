@@ -1,5 +1,16 @@
 defmodule PhoenixSampleWeb.Endpoint do
+  @moduledoc """
+  A standard Phoenix application endpoint module. The `use Absinthe.Phoenix.Endpoint`
+  enables Absinthe subscriptions to be sent over Phoenix Channels, and can be
+  commented out if only the Apollo socket protocol is needed.
+  """
   use Phoenix.Endpoint, otp_app: :phoenix_sample
+
+  if Application.get_env(:phoenix_sample, :gql_on_phoenix_channels?, false) do
+    use Absinthe.Phoenix.Endpoint
+  end
+
+  require Logger
 
   # The session will be stored in the cookie and signed,
   # this means its contents can be read but not tampered with.
@@ -50,4 +61,40 @@ defmodule PhoenixSampleWeb.Endpoint do
   plug Plug.Head
   plug Plug.Session, @session_options
   plug PhoenixSampleWeb.Router
+
+  @doc """
+  Dynamic initialization of the endpoint's configuration.
+  We override the Cowboy dispatcher to put our Apollo socket handler
+  ahead of the Phoenix endpoint adapter.
+  """
+  def init(_supervisor, config) do
+    # Read pubsub module from config.exs
+    absinthe_pubsub = PhoenixSample.Application.absinthe_pubsub_module()
+
+    # Read APOLLO_SOCKET_PATH environment variable
+    socket_path = System.get_env("APOLLO_SOCKET_PATH", "websocket")
+
+    updated_config =
+      config
+      |> put_in([:http, :dispatch], [
+        {:_,
+         [
+           {
+             "/socket/#{socket_path}",
+             ApolloSocket.CowboySocketHandler,
+             # ApolloSocket configuration settings
+             {
+               ApolloSocket.AbsintheMessageHandler,
+               schema: PhoenixSample.Schema,
+               pubsub: absinthe_pubsub,
+               broker_sup: PhoenixSample.BrokerSupervisor
+             }
+           },
+           {:_, Phoenix.Endpoint.Cowboy2Handler, {PhoenixSampleWeb.Endpoint, []}}
+         ]}
+      ])
+
+
+    {:ok, updated_config}
+  end
 end
