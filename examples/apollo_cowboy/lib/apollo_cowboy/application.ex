@@ -1,4 +1,10 @@
-defmodule ApolloCowboyExample do
+defmodule ApolloCowboyExample.Application do
+  # See https://hexdocs.pm/elixir/Application.html
+  # for more information on OTP Applications
+  @moduledoc false
+
+  use Application
+
   def start(_mode, _args) do
     # Define the router for cowboy that includes a socket handler
     # for the apollo sockets and a couple of static handlers
