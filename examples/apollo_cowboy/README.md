@@ -9,16 +9,6 @@ To start the cowboy server:
   * Install Node.js dependencies with `npm install` inside the `assets` directory
   * Start Phoenix endpoint with `mix run --no-halt`
 
-After starting, connect to the Apollo socket at:
-
-ws://localhost:8080/socket/websocket
-
-To start the cowboy server:
-
-  * Install dependencies with `mix deps.get`
-  * Install Node.js dependencies with `npm install` inside the `assets` directory
-  * Start Phoenix endpoint with `mix run --no-halt`
-
 Two options can be set through environment variables:
 
 `PORT` will set the port that cowboy listens on. 
