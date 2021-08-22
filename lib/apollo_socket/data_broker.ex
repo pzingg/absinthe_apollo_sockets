@@ -4,7 +4,6 @@ defmodule ApolloSocket.DataBroker do
   alias ApolloSocket.OperationMessage
 
   require Logger
-  require IEx
 
   @moduledoc """
   This module implements a GenServer that sits as an intermediary between
@@ -18,7 +17,7 @@ defmodule ApolloSocket.DataBroker do
     :apollo_socket,
     :pubsub,
     :absinthe_id,
-    :operation_id,
+    :operation_id
   ]
 
   def start_link(options) do
@@ -44,10 +43,10 @@ defmodule ApolloSocket.DataBroker do
   end
 
   def handle_info({:DOWN, _ref, :process, pid, reason}, state) do
-    # my websocket went down.  This process can exit now
+    # Websocket went down.  This process can exit now
     Logger.info("id #{state.operation_id} tearing down data broker #{inspect(pid)} #{reason}")
 
-    {:stop, :normal, state}
+    {:stop, reason, state}
   end
 
   @response_set MapSet.new([:data, :errors, :extensions])
@@ -71,14 +70,14 @@ defmodule ApolloSocket.DataBroker do
     {:noreply, state}
   end
 
-  def subscribe_to_data(nil, _), do: raise "#{__MODULE__} requires the Absinthe PubSub module to subscribe to"
-  def subscribe_to_data(_, nil), do: raise "#{__MODULE__} requires an Absinthe subscription id"
-  def subscribe_to_data(pubsub, absinthe_id) do
+  defp subscribe_to_data(nil, _), do: raise "#{__MODULE__} requires the Absinthe PubSub module to subscribe to"
+  defp subscribe_to_data(_, nil), do: raise "#{__MODULE__} requires an Absinthe subscription id"
+  defp subscribe_to_data(pubsub, absinthe_id) do
     pubsub.subscribe(absinthe_id)
   end
 
-  def monitor_websocket(nil), do: raise "#__MODULE__ requires the pid of the hosting websocket"
-  def monitor_websocket(socket) do
+  defp monitor_websocket(nil), do: raise "#{__MODULE__} requires the pid of the hosting websocket"
+  defp monitor_websocket(socket) do
     Process.monitor(socket)
   end
 end
