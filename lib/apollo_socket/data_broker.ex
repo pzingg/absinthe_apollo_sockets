@@ -50,6 +50,18 @@ defmodule ApolloSocket.DataBroker do
     {:noreply, state}
   end
 
+  def handle_info(%{event: "subscription:data", topic: topic, payload: %{result: result}}, state) when is_map(result) do
+    # This function signature is used only if the application configured
+    # `{AbsintheSubscription, MyAppWeb.Endpoint}` in its supervision tree on startup,
+    # to support Absinthe subscriptions over Phoenix Channels.
+    if topic == state.absinthe_id do
+      send_data_result(result, state)
+    else
+      Logger.warn("id #{state.operation_id} subscription data mismatch, ignored")
+    end
+    {:noreply, state}
+  end
+
   def handle_info(%{data: _, errors: _} = proc_message, state) do
     send_data_result(proc_message, state)
   end

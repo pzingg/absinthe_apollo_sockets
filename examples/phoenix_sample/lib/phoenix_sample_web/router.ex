@@ -1,4 +1,11 @@
 defmodule PhoenixSampleWeb.Router do
+  @moduledoc """
+  Configure the routing for a Phoenix web application.
+
+  In config.exs, set the value of the local variable `gql_on_http`
+  to true to serve HTTP Absinthe queries at the path "/gql",
+  via a browser or other HTTP client.
+  """
   use PhoenixSampleWeb, :router
 
   pipeline :browser do
@@ -11,6 +18,24 @@ defmodule PhoenixSampleWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
+  end
+
+  if Application.get_env(:phoenix_sample, :gql_on_http?, false) do
+    absinthe_pubsub = PhoenixSample.Application.absinthe_pubsub_module()
+
+    # This scope provides HTTP access to GraphQL queries and may be omitted
+    # if only the Apollo Websocket protocol for Absinthe subscriptions is used.
+    scope "/gql" do
+      pipe_through :api
+
+      forward "/graphiql", Absinthe.Plug.GraphiQL,
+        schema: PhoenixSample.Schema,
+        socket: PhoenixSampleWeb.UserSocket,
+        interface: :simple,
+        context: %{pubsub: absinthe_pubsub}
+
+      forward "/", Absinthe.Plug, schema: PhoenixSample.Schema
+    end
   end
 
   scope "/", PhoenixSampleWeb do

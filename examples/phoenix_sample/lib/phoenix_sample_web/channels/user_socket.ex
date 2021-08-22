@@ -1,5 +1,14 @@
 defmodule PhoenixSampleWeb.UserSocket do
+  @moduledoc """
+  Defines the Phoenix socket and channel configurations.
+  Include the `use Absinthe.Phoenix.Socket` line only if you need to support
+  Absinthe subscriptions on Phoenix Channels.
+  """
   use Phoenix.Socket
+
+  if Application.get_env(:phoenix_sample, :gql_on_phoenix_channels?, false) do
+    use Absinthe.Phoenix.Socket, schema: PhoenixSample.Schema
+  end
 
   ## Channels
   # channel "room:*", PhoenixSampleWeb.RoomChannel

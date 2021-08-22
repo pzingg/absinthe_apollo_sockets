@@ -7,28 +7,27 @@
 # General application configuration
 use Mix.Config
 
+# Set this variable to 'true' to support Absinthe subscriptions on the
+# Phoenix Channel protocol AS WELL AS on the Apollo Websocket protocol:
+gql_on_phoenix_channels = true
+
+# Set this variable to 'true' to support GraphQL queries on HTTP, and
+# to serve GraphiQL interactive query and subscription pages.
+gql_on_http = true
+
+# Used at application start
+config :phoenix_sample,
+  gql_on_http?: gql_on_http,
+  gql_on_phoenix_channels?: gql_on_http || gql_on_phoenix_channels
+
 # Configures the endpoint
+# The Apollo socket configuration will be initialized at runtime.
 config :phoenix_sample, PhoenixSampleWeb.Endpoint,
   url: [host: "localhost"],
   secret_key_base: "lcHcYi7X2kV8DC9nvRqMRQGUfKxok0w4EGDYmn1ZR0HFctPVLryd4sDp9Q5u9VH9",
   render_errors: [view: PhoenixSampleWeb.ErrorView, accepts: ~w(html json), layout: false],
   pubsub_server: PhoenixSample.PubSub,
-  live_view: [signing_salt: "ydK4MZhU"],
-
-  # We override the Cowboy dispatcher to put our apollo socket handler
-  # ahead of the Phoenix endpoint adapter.
-  http: [dispatch: [
-          {:_, [
-              {"/socket/apollo_socket", ApolloSocket.CowboySocketHandler,
-                { # ApolloSocket configuration settings
-                  ApolloSocket.AbsintheMessageHandler,
-                  schema: PhoenixSample.Schema,
-                  pubsub: PhoenixSample.Absinthe.PubSub,
-                  broker_sup: PhoenixSample.BrokerSupervisor
-                }
-              },
-              {:_, Phoenix.Endpoint.Cowboy2Handler, {PhoenixSampleWeb.Endpoint, []}}
-            ]}]]
+  live_view: [signing_salt: "ydK4MZhU"]
 
 # Configures Elixir's Logger
 config :logger, :console,
