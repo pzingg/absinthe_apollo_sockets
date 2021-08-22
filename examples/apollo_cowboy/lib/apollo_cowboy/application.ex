@@ -53,7 +53,7 @@ defmodule ApolloCowboyExample.Application do
     )
   end
 
-  def cowboy_server(port, dispatch) do
+  defp cowboy_server(port, dispatch) do
     %{
       type: :supervisor,
       id: :cowboy,
