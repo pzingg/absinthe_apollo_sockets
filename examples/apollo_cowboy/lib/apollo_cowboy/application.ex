@@ -1,5 +1,11 @@
-defmodule ApolloCowboyExample do
-  def start(_mode, _args) do
+defmodule ApolloCowboyExample.Application do
+  # See https://hexdocs.pm/elixir/Application.html
+  # for more information on OTP Applications
+  @moduledoc false
+
+  use Application
+
+  def start(_type, _args) do
     # Define the router for cowboy that includes a socket handler
     # for the apollo sockets and a couple of static handlers
     # that serve up the example website.
@@ -21,7 +27,7 @@ defmodule ApolloCowboyExample do
 
     children = [
       # This is the supervisor that provides a set of counters in the schema
-      {ApolloCowboyExample.Counter},
+      ApolloCowboyExample.Counter,
 
       # Absinthe uses a PubSub system to handle subscriptions.
       # Ours is built on top of Phoenix PubSub so we create that

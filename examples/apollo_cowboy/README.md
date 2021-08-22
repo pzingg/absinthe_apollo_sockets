@@ -1,6 +1,13 @@
 # ApolloCowboy
 
-**TODO: Add description**
+Example of ApolloSocket running on a cowboy webserver, without any Phoenix
+dependencies other than the Phoenix.PubSub system.
+
+To start the cowboy server:
+
+  * Install dependencies with `mix deps.get`
+  * Install Node.js dependencies with `npm install` inside the `assets` directory
+  * Start Phoenix endpoint with `mix run --no-halt`
 
 ## Installation
 
