@@ -10,8 +10,6 @@ defmodule PhoenixSampleWeb.Endpoint do
     use Absinthe.Phoenix.Endpoint
   end
 
-  require Logger
-
   # The session will be stored in the cookie and signed,
   # this means its contents can be read but not tampered with.
   # Set :encryption_salt if you would also like to encrypt it.
@@ -93,7 +91,6 @@ defmodule PhoenixSampleWeb.Endpoint do
            {:_, Phoenix.Endpoint.Cowboy2Handler, {PhoenixSampleWeb.Endpoint, []}}
          ]}
       ])
-
 
     {:ok, updated_config}
   end

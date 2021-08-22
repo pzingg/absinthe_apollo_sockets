@@ -1,4 +1,8 @@
 defmodule ApolloCowboyExample.Application do
+  # See https://hexdocs.pm/elixir/Application.html
+  # for more information on OTP Applications
+  @moduledoc false
+
   use Application
 
   def start(_mode, _args) do
@@ -34,7 +38,7 @@ defmodule ApolloCowboyExample.Application do
       {Phoenix.PubSub, name: ApolloCowboyExample.PubSub},
 
       # This is the Absinthe PubSub that makes use of the Phoenix Pubsub
-      {Absinthe.Subscription, ApolloCowboyExample.Absinthe.PubSub},
+      {Absinthe.Subscription, ApolloCowboyExample.Absinthe.PubSub),
 
       # When a subscription is created we create an intermediary process that
       # translates from the Absinthe PubSub to the Apollo socket protocol
