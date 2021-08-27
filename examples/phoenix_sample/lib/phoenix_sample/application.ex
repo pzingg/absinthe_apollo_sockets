@@ -26,6 +26,11 @@ defmodule PhoenixSample.Application do
       # Start the PubSub system
       {Phoenix.PubSub, name: PhoenixSample.PubSub},
 
+      # When a subscription is created we create an intermediary process that
+      # translates from the Absinthe PubSub to the Apollo socket protocol
+      # This supervisor watches those subscriptions.
+      {DynamicSupervisor, strategy: :one_for_one, name: PhoenixSample.BrokerSupervisor},
+
       # Start the Endpoint (http/https)
       PhoenixSampleWeb.Endpoint,
 
@@ -33,11 +38,6 @@ defmodule PhoenixSample.Application do
       # that translates from Absinthe related notifications to
       # the Phoenix PubSub system started above
       {Absinthe.Subscription, absinthe_pubsub_module()},
-
-      # When a subscription is created we create an intermediary process that
-      # translates from the Absinthe PubSub to the Apollo socket protocol
-      # This supervisor watches those subscriptions.
-      {DynamicSupervisor, strategy: :one_for_one, name: PhoenixSample.BrokerSupervisor}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
